@@ -14,6 +14,8 @@ public class FileReader {
     private final static String STATIC_PATH = "static";
     private final static Logger log = LoggerFactory.getLogger(FileReader.class);
 
+    private FileReader() {}
+
     public static byte[] getContent(String resourceName) {
 
         URL resource = FileReader.class.getClassLoader().getResource(STATIC_PATH + resourceName);
