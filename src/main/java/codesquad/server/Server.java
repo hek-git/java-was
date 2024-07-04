@@ -1,6 +1,5 @@
-package codesquad;
+package codesquad.server;
 
-import codesquad.handler.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +35,8 @@ public class Server {
                 executorService.submit(new RequestHandler(clientSocket));
             } catch (IOException e) {
                 log.info("Cannot accept client connection");
+            } catch (RuntimeException e) {
+                log.info(e.getMessage());
             }
         }
     }
