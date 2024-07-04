@@ -2,7 +2,7 @@ package codesquad.http.request;
 
 import java.util.Map;
 
-public record HttpRequest(String method, String path, String version, Map<String, String> headers, String body) {
+public record HttpRequest(String method, String path, String version, Map<String, String> headers, byte[] body) {
 
     @Override
     public String toString() {
@@ -11,6 +11,7 @@ public record HttpRequest(String method, String path, String version, Map<String
         sb.append("Path: ").append(path).append("\n");
         sb.append("Version: ").append(version).append("\n");
         headers.forEach((key, value) -> sb.append(key).append(": ").append(value).append("\n"));
+        sb.append("Body: ").append(new String(body)).append("\n");
         return sb.toString();
     }
 }

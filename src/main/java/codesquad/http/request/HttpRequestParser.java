@@ -15,18 +15,17 @@ public class HttpRequestParser {
     public HttpRequest parse(BufferedReader bufferedReader) throws IOException {
 
         String line = bufferedReader.readLine();
-
         String[] requests;
         Map<String, String> headers = new HashMap<>();
         StringBuilder body = new StringBuilder();
 
-        // Parse request line
+//         Parse request line
         if (line == null) {
             throw new NullPointerException("requestLine is null");
         }
         requests = line.split(" ");
 
-        // Parse headers
+//         Parse headers
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] headerParts = line.split(":", 2);
             if (headerParts.length == 2) {
@@ -43,6 +42,6 @@ public class HttpRequestParser {
             body.append(String.valueOf(buffer));
         }
 
-        return new HttpRequest(requests[0], requests[1], requests[2], headers, body.toString());
+        return new HttpRequest(requests[0], requests[1], requests[2], headers, body.toString().getBytes());
     }
 }
