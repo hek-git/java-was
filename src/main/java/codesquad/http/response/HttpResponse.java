@@ -22,6 +22,10 @@ public class HttpResponse {
         setMessageBody(body);
     }
 
+    public HttpResponse(String redirectUrl){
+        setRedirect(redirectUrl);
+    }
+
     public byte[] getBody() {
         return body;
     }
@@ -62,7 +66,6 @@ public class HttpResponse {
             return;
         }
 
-        // body, header를 분리하는 방식으로 리팩토링(처리해야 하는 규모가 커지면)
         this.httpStatusCode = 200;
         this.reasonPhrase = "OK";
         headers.put("Content-Type", contentType);
@@ -71,6 +74,12 @@ public class HttpResponse {
 
     private void setMessageBody(byte[] body) {
         this.body = body;
+    }
+
+    private void setRedirect(String url) {
+        this.httpStatusCode = 302;
+        this.reasonPhrase = "Found";
+        this.headers.put("Location", url);
     }
 
     @Override
