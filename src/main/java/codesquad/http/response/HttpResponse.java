@@ -3,7 +3,6 @@ package codesquad.http.response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,15 +10,25 @@ public class HttpResponse {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    private static final Map<String, String> contentTypeMap = new HashMap<>();
     private final String HTTP_VERSION = "HTTP/1.1";
     private int httpStatusCode;
     private String reasonPhrase;
     private final Map<String, String> headers = new HashMap<>();
     private byte[] body;
 
+    static {
+        contentTypeMap.put("html", "text/html");
+        contentTypeMap.put("css", "text/css");
+        contentTypeMap.put("js", "application/javascript");
+        contentTypeMap.put("ico", "image/x-icon");
+        contentTypeMap.put("png", "image/png");
+        contentTypeMap.put("jpg", "image/jpeg");
+        contentTypeMap.put("svg", "image/svg+xml");
+    }
 
-    public HttpResponse(byte[] body) {
-        setMessageHeader(body.length);
+    public HttpResponse(String filePath, byte[] body) {
+        setMessageHeader(filePath, body.length);
         setMessageBody(body);
     }
 
@@ -50,16 +59,23 @@ public class HttpResponse {
         responseBuilder.append("\r\n");
 
         // Convert headers and status line to byte array
-        return responseBuilder.toString().getBytes(StandardCharsets.UTF_8);
+        return responseBuilder.toString().getBytes();
     }
 
-    private void setMessageHeader(int contentLength) {
+    private void setMessageHeader(String filePath, int contentLength) {
 
+        String contentType = contentTypeMap.get(getFileExtension(filePath));
 
+        if (contentType == null) {
+            this.httpStatusCode = 415;
+            this.reasonPhrase = "Unsupported Media Type";
+            return;
+        }
 
         // body, header를 분리하는 방식(커지면)
         this.httpStatusCode = 200;
         this.reasonPhrase = "OK";
+        headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(contentLength));
     }
 
@@ -67,7 +83,15 @@ public class HttpResponse {
         this.body = body;
     }
 
+    private String getFileExtension(String filePath) {
+        int lastIndexOfDot = filePath.lastIndexOf('.');
+        int lastIndexOfSlash = filePath.lastIndexOf('/');
 
+        if (lastIndexOfDot > lastIndexOfSlash && lastIndexOfDot != -1) {
+            return filePath.substring(lastIndexOfDot + 1);
+        }
+        return "";
+    }
 
     @Override
     public String toString() {
