@@ -1,6 +1,7 @@
-package codesquad.handler;
+package codesquad.server;
 
-import codesquad.file.FileReader;
+import codesquad.handler.Handler;
+import codesquad.handler.HandlerMapper;
 import codesquad.http.request.HttpRequest;
 import codesquad.http.request.HttpRequestParser;
 import codesquad.http.response.HttpResponse;
@@ -17,34 +18,43 @@ public class RequestHandler implements Runnable {
     private final InputStream inputStream;
     private final OutputStream outputStream;
     private final HttpRequestParser httpRequestParser;
-//    private final HttpResponseBuilder httpResponseBuilder;
-    private FileReader fileReader;
-//    private final UrlMapper urlMapper;
 
     public RequestHandler(Socket clientSocket) throws IOException {
         this.inputStream = clientSocket.getInputStream();
         this.outputStream = clientSocket.getOutputStream();
         this.httpRequestParser = new HttpRequestParser();
-//        this.httpResponseBuilder = new HttpResponseBuilder();
-//        this.urlMapper = new UrlMapper();
     }
 
     @Override
     public void run() {
 
         try {
+//             HttpRequest 클래스로 파싱하는 부분
             HttpRequest request = httpRequestParser.parse(new BufferedReader(new InputStreamReader(inputStream)));
-            log.info("{}\n", request.toString());
+//            log.info("{}\n", request.toString());
+            log.info("Request Method : {}", request.method());
+            log.info("Request URI : {}", request.path());
+            log.info("Request Body: {}\n", new String(request.body()));
 
-            HttpResponse response = new HttpResponse(request.path(), FileReader.getContent(request.path()));
+            // HandlerMapper 이용하여 요청을 처리할 수 있는 Handler 찾고 요청 handling
+            Handler handler = HandlerMapper.findHandler(request.path());
+            if (handler == null) {
+                outputStream.flush();
+                outputStream.close();
+                inputStream.close();
+                throw new RuntimeException("Cannot handle request");
+            }
+            HttpResponse response = handler.handle(request);
 
+//             HttpResponse 인스턴스를 반환하는 부분
             outputStream.write(response.toByteArray());
             outputStream.write(response.getBody());
 
             outputStream.flush();
             outputStream.close();
+            inputStream.close();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error(e.getMessage());
         }
 
