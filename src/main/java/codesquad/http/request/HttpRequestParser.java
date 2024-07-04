@@ -39,9 +39,8 @@ public class HttpRequestParser {
             int length = Integer.parseInt(s);
             char[] buffer = new char[length];
             bufferedReader.read(buffer, 0, length);
-            body.append(String.valueOf(buffer));
+            return new HttpRequest(requests[0], requests[1], requests[2], headers, body.toString().getBytes());
         }
-
-        return new HttpRequest(requests[0], requests[1], requests[2], headers, body.toString().getBytes());
+        return new HttpRequest(requests[0], requests[1], requests[2], headers, "".getBytes());
     }
 }
