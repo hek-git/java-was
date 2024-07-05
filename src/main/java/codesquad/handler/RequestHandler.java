@@ -4,46 +4,48 @@ import codesquad.file.FileReader;
 import codesquad.http.request.HttpRequest;
 import codesquad.http.request.HttpRequestParser;
 import codesquad.http.response.HttpResponse;
-import codesquad.http.response.HttpResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
 
-public class RequestHandler implements Runnable{
+public class RequestHandler implements Runnable {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private final Socket clientSocket;
 
-    public RequestHandler(Socket clientSocket) {
-        this.clientSocket = clientSocket;
+    private final InputStream inputStream;
+    private final OutputStream outputStream;
+    private final HttpRequestParser httpRequestParser;
+//    private final HttpResponseBuilder httpResponseBuilder;
+    private FileReader fileReader;
+//    private final UrlMapper urlMapper;
+
+    public RequestHandler(Socket clientSocket) throws IOException {
+        this.inputStream = clientSocket.getInputStream();
+        this.outputStream = clientSocket.getOutputStream();
+        this.httpRequestParser = new HttpRequestParser();
+//        this.httpResponseBuilder = new HttpResponseBuilder();
+//        this.urlMapper = new UrlMapper();
     }
 
     @Override
     public void run() {
 
-        HttpRequestParser httpRequestParser = new HttpRequestParser();
         try {
-            HttpRequest request = httpRequestParser.parse(new BufferedReader(new InputStreamReader(clientSocket.getInputStream())));
-            OutputStream clientOutput = clientSocket.getOutputStream();
+            HttpRequest request = httpRequestParser.parse(new BufferedReader(new InputStreamReader(inputStream)));
+            log.info("{}\n", request.toString());
 
-            log.info("Method : {}",request.method());
-            log.info("Path : {}",request.path());
-            log.info("Version : {}",request.version());
-            log.info("Body: {}",request.body());
+            HttpResponse response = new HttpResponse(request.path(), FileReader.getContent(request.path()));
 
-            FileReader fileReader = new FileReader();
-            File file = fileReader.getFile(request.path());
+            outputStream.write(response.toByteArray());
+            outputStream.write(response.getBody());
 
-            HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder(file);
-            HttpResponse response = httpResponseBuilder.build();
+            outputStream.flush();
+            outputStream.close();
 
-            clientOutput.write(response.toString().getBytes());
-            clientOutput.flush();
-            clientOutput.close();
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         }
 
     }
