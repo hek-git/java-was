@@ -1,5 +1,6 @@
 package codesquad.http.response;
 
+import codesquad.util.ContentTypeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,26 +11,19 @@ public class HttpResponse {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private static final Map<String, String> contentTypeMap = new HashMap<>();
     private final String HTTP_VERSION = "HTTP/1.1";
     private int httpStatusCode;
     private String reasonPhrase;
     private final Map<String, String> headers = new HashMap<>();
     private byte[] body;
 
-    static {
-        contentTypeMap.put("html", "text/html");
-        contentTypeMap.put("css", "text/css");
-        contentTypeMap.put("js", "application/javascript");
-        contentTypeMap.put("ico", "image/x-icon");
-        contentTypeMap.put("png", "image/png");
-        contentTypeMap.put("jpg", "image/jpeg");
-        contentTypeMap.put("svg", "image/svg+xml");
-    }
-
     public HttpResponse(String filePath, byte[] body) {
         setMessageHeader(filePath, body.length);
         setMessageBody(body);
+    }
+
+    public HttpResponse(String redirectUrl){
+        setRedirect(redirectUrl);
     }
 
     public byte[] getBody() {
@@ -64,7 +58,7 @@ public class HttpResponse {
 
     private void setMessageHeader(String filePath, int contentLength) {
 
-        String contentType = contentTypeMap.get(getFileExtension(filePath));
+        String contentType = ContentTypeMapper.getContentTypeFromPath(filePath);
 
         if (contentType == null) {
             this.httpStatusCode = 415;
@@ -72,7 +66,6 @@ public class HttpResponse {
             return;
         }
 
-        // body, header를 분리하는 방식(커지면)
         this.httpStatusCode = 200;
         this.reasonPhrase = "OK";
         headers.put("Content-Type", contentType);
@@ -83,14 +76,10 @@ public class HttpResponse {
         this.body = body;
     }
 
-    private String getFileExtension(String filePath) {
-        int lastIndexOfDot = filePath.lastIndexOf('.');
-        int lastIndexOfSlash = filePath.lastIndexOf('/');
-
-        if (lastIndexOfDot > lastIndexOfSlash && lastIndexOfDot != -1) {
-            return filePath.substring(lastIndexOfDot + 1);
-        }
-        return "";
+    private void setRedirect(String url) {
+        this.httpStatusCode = 302;
+        this.reasonPhrase = "Found";
+        this.headers.put("Location", url);
     }
 
     @Override

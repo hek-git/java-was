@@ -27,6 +27,7 @@
           <div class="textfield textfield_size_s">
             <p class="title_textfield">아이디</p>
             <input
+              id="username"
               class="input_textfield"
               placeholder="아이디를 입력해주세요"
               autocomplete="username"
@@ -35,6 +36,7 @@
           <div class="textfield textfield_size_s">
             <p class="title_textfield">닉네임</p>
             <input
+              id="nickname"
               class="input_textfield"
               placeholder="닉네임을 입력해주세요"
               autocomplete="username"
@@ -43,6 +45,7 @@
           <div class="textfield textfield_size_s">
             <p class="title_textfield">비밀번호</p>
             <input
+              id="password"
               class="input_textfield"
               type="password"
               placeholder="비밀번호를 입력해주세요"
@@ -60,5 +63,23 @@
         </form>
       </div>
     </div>
+    <script>
+      document.getElementById('registration-btn').addEventListener('click', function() {
+        var username = document.getElementById('username').value;
+        var nickname = document.getElementById('nickname').value;
+        var password = document.getElementById('password').value;
+
+        // Encode values to be safely used as URL parameters
+        var params = new URLSearchParams();
+        params.append('userId', username);
+        params.append('password', password);
+        params.append('name', nickname);
+
+
+        var url = '/user/create?' + params.toString();
+
+        window.location.href = url;
+      });
+    </script>
   </body>
 </html>
