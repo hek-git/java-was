@@ -12,7 +12,7 @@ public class HandlerMapper {
     private static final Map<String, Handler> handlerMapper = new HashMap<>();
 
     static {
-        handlerMapper.put("/create", new CreateHandler(new UserRepository()));
+        handlerMapper.put("/create", new CreateUserHandler(new UserRepository()));
     }
 
     private HandlerMapper() {
