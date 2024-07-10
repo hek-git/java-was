@@ -1,5 +1,6 @@
 package codesquad.handler;
 
+import codesquad.repository.UserRepository;
 import codesquad.util.ContentTypeMapper;
 import codesquad.util.DirectoryMapper;
 
@@ -11,7 +12,7 @@ public class HandlerMapper {
     private static final Map<String, Handler> handlerMapper = new HashMap<>();
 
     static {
-        handlerMapper.put("/create", new CreateHandler());
+        handlerMapper.put("/create", new CreateHandler(new UserRepository()));
     }
 
     private HandlerMapper() {
