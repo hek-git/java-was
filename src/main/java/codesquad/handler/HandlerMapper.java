@@ -10,12 +10,10 @@ import java.util.Optional;
 
 public class HandlerMapper {
 
-    private static final Map<String, Handler> handlerMapper = new HashMap<>();
-
-    static {
-        handlerMapper.put("/create", new UserCreateHandler(new UserDatabase()));
-        handlerMapper.put("/login", new UserLoginHandler(new UserDatabase()));
-    }
+    private static final Map<String, Handler> handlerMapper = Map.of(
+        "/create", new UserCreateHandler(),
+        "/login", new UserLoginHandler()
+    );
 
     private HandlerMapper() {
     }
