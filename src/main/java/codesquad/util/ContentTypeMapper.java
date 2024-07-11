@@ -11,6 +11,7 @@ public class ContentTypeMapper {
         contentTypeMap.put("html", "text/html");
         contentTypeMap.put("css", "text/css");
         contentTypeMap.put("js", "application/javascript");
+        contentTypeMap.put("text", "text/plain");
         contentTypeMap.put("ico", "image/x-icon");
         contentTypeMap.put("png", "image/png");
         contentTypeMap.put("jpg", "image/jpeg");

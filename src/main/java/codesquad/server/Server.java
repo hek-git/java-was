@@ -32,7 +32,7 @@ public class Server {
             try {
                 Socket clientSocket = serverSocket.accept();  // 클라이언트 연결을 수락합니다.
                 log.info("Client connected");
-                executorService.submit(new RequestHandler(clientSocket));
+                executorService.execute(new RequestHandler(clientSocket));
             } catch (IOException e) {
                 log.info("Cannot accept client connection");
             } catch (RuntimeException e) {

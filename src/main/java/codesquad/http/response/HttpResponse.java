@@ -1,5 +1,6 @@
 package codesquad.http.response;
 
+import codesquad.http.HttpStatus;
 import codesquad.util.ContentTypeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,13 +13,12 @@ public class HttpResponse {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final String HTTP_VERSION = "HTTP/1.1";
-    private int httpStatusCode;
-    private String reasonPhrase;
+    private HttpStatus httpStatus;
     private final Map<String, String> headers = new HashMap<>();
     private byte[] body;
 
-    public HttpResponse(String filePath, byte[] body) {
-        setMessageHeader(filePath, body.length);
+    public HttpResponse(HttpStatus httpstatus, String filePath, byte[] body) {
+        setMessageHeader(httpstatus, filePath, body.length);
         setMessageBody(body);
     }
 
@@ -36,9 +36,9 @@ public class HttpResponse {
         // Status line
         responseBuilder.append(HTTP_VERSION)
                 .append(" ")
-                .append(httpStatusCode)
+                .append(httpStatus.getStatusCode())
                 .append(" ")
-                .append(reasonPhrase)
+                .append(httpStatus.getReasonPhrase())
                 .append("\r\n");
 
         // Headers
@@ -56,18 +56,11 @@ public class HttpResponse {
         return responseBuilder.toString().getBytes();
     }
 
-    private void setMessageHeader(String filePath, int contentLength) {
+    private void setMessageHeader(HttpStatus httpStatus, String filePath, int contentLength) {
 
+        this.httpStatus = httpStatus;
         String contentType = ContentTypeMapper.getContentTypeFromPath(filePath);
 
-        if (contentType == null) {
-            this.httpStatusCode = 415;
-            this.reasonPhrase = "Unsupported Media Type";
-            return;
-        }
-
-        this.httpStatusCode = 200;
-        this.reasonPhrase = "OK";
         headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(contentLength));
     }
@@ -77,15 +70,14 @@ public class HttpResponse {
     }
 
     private void setRedirect(String url) {
-        this.httpStatusCode = 302;
-        this.reasonPhrase = "Found";
+        this.httpStatus = HttpStatus.FOUND;
         this.headers.put("Location", url);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(HTTP_VERSION).append(" ").append(httpStatusCode).append(" ").append(reasonPhrase).append("\r\n");
+        sb.append(HTTP_VERSION).append(" ").append(httpStatus.getStatusCode()).append(" ").append(httpStatus.getReasonPhrase()).append("\r\n");
         headers.forEach((key, value) -> sb.append(key).append(": ").append(value).append("\r\n"));
         sb.append("\r\n");
         sb.append(new String(body));

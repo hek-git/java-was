@@ -17,7 +17,6 @@ public class HttpRequestParser {
         String line = bufferedReader.readLine();
         String[] requests;
         Map<String, String> headers = new HashMap<>();
-        StringBuilder body = new StringBuilder();
 
 //         Parse request line
         if (line == null) {
@@ -39,7 +38,9 @@ public class HttpRequestParser {
             int length = Integer.parseInt(s);
             char[] buffer = new char[length];
             bufferedReader.read(buffer, 0, length);
-            return new HttpRequest(requests[0], requests[1], requests[2], headers, body.toString().getBytes());
+            byte[] body = new String(buffer).getBytes("UTF-8");
+//            log.info("body : {}", new String(body));
+            return new HttpRequest(requests[0], requests[1], requests[2], headers, body);
         }
         return new HttpRequest(requests[0], requests[1], requests[2], headers, "".getBytes());
     }
