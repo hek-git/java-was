@@ -13,7 +13,7 @@ public class FileReader {
     private FileReader() {
     }
 
-    public static byte[] getContent(String resourceName) {
+    public static byte[] getContent(String resourceName) throws Exception {
 
         InputStream resourceAsStream = FileReader.class.getResourceAsStream(STATIC_PATH + resourceName);
 
@@ -23,7 +23,7 @@ public class FileReader {
             }
             return resourceAsStream.readAllBytes();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new Exception(e);
         }
 
     }
