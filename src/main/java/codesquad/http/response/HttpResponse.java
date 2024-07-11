@@ -56,6 +56,10 @@ public class HttpResponse {
         return responseBuilder.toString().getBytes();
     }
 
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
     private void setMessageHeader(HttpStatus httpStatus, String filePath, int contentLength) {
 
         this.httpStatus = httpStatus;
