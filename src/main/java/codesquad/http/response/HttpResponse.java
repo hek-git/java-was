@@ -74,6 +74,10 @@ public class HttpResponse {
         this.headers.put("Location", url);
     }
 
+    public static HttpResponse internalServerError() {
+        return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, "text", new byte[0]);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
