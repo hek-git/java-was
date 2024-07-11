@@ -6,7 +6,7 @@ import codesquad.http.response.HttpResponse;
 public interface Handler {
 
     HttpResponse handle(HttpRequest request);
-    boolean isGet(HttpRequest request);
-    boolean isPost(HttpRequest request);
+    HttpResponse doGet(HttpRequest request);
+    HttpResponse doPost(HttpRequest request);
 
 }
