@@ -4,7 +4,7 @@ import codesquad.http.HttpStatus;
 import codesquad.http.request.HttpRequest;
 import codesquad.http.response.HttpResponse;
 import codesquad.model.User;
-import codesquad.repository.UserRepository;
+import codesquad.database.UserDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,13 +12,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateUserHandler implements Handler {
+public class UserCreateHandler implements Handler {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final UserRepository userRepository;
+    private final UserDatabase userDatabase;
 
-    public CreateUserHandler(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserCreateHandler(UserDatabase userDatabase) {
+        this.userDatabase = userDatabase;
     }
 
     @Override
@@ -36,42 +36,34 @@ public class CreateUserHandler implements Handler {
 
     @Override
     public HttpResponse doPost(HttpRequest request) {
-        Map<String, String> stringMap;
+        User user;
         try {
-            stringMap = parseUserInfo(new String(request.body(), "UTF-8"));
+            user = parseUserInfo(new String(request.body(), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
 
-        String userId = stringMap.get("userId");
-        String password = stringMap.get("password");
-        String name = stringMap.get("name");
+        if(user.isNull()){
+            return new HttpResponse(HttpStatus.BAD_REQUEST, "text", "".getBytes());
+        }
 
-        User user = new User(userId, password, name);
-        userRepository.addUser(user);
+        userDatabase.addUser(user);
         log.info(user.toString());
         return new HttpResponse("/");
     }
 
-    private static Map<String, String> parseUserInfo(String body) {
+    private User parseUserInfo(String body) {
         Map<String, String> userInfo = new HashMap<>();
-
         // 쿼리 문자열을 파라미터로 분리
         String[] params = body.split("&");
 
         for (String param : params) {
             String[] keyValue = param.split("=");
             if (keyValue.length == 2) {
-                String key = keyValue[0];
-                String value = keyValue[1];
-
-                // userId, password, name만 추출
-                if (key.equals("userId") || key.equals("password") || key.equals("name")) {
-                    userInfo.put(key, value);
-                }
+                userInfo.put(keyValue[0], keyValue[1]);
             }
         }
-        return userInfo;
+        return new User(userInfo.get("userId"), userInfo.get("password"), userInfo.get("name"));
     }
 
 }
