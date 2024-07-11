@@ -40,7 +40,9 @@ public class RequestHandler implements Runnable {
             // HandlerMapper 이용하여 요청을 처리할 수 있는 Handler 찾고 요청 handling
             Handler handler = HandlerMapper.findHandler(request.path());
             if (handler == null) {
-                throw new RuntimeException("Cannot handle request");
+                outputStream.write(HttpResponse.internalServerError().toByteArray());
+                outputStream.write(HttpResponse.internalServerError().getBody());
+                throw new Exception("Cannot handle request");
             }
             HttpResponse response = handler.handle(request);
 
@@ -48,7 +50,7 @@ public class RequestHandler implements Runnable {
             outputStream.write(response.toByteArray());
             outputStream.write(response.getBody());
             outputStream.flush();
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
