@@ -15,10 +15,9 @@ import java.util.Map;
 public class UserCreateHandler implements Handler {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final UserDatabase userDatabase;
+    private final UserDatabase userDatabase = new UserDatabase();
 
-    public UserCreateHandler(UserDatabase userDatabase) {
-        this.userDatabase = userDatabase;
+    public UserCreateHandler() {
     }
 
     @Override

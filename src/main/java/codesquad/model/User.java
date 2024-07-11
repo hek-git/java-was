@@ -30,7 +30,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User [id=" + userId + ", password=" + password + ", name=" + name + "]";
+        return "User[id=" + userId + ", password=" + password + ", name=" + name + "]";
     }
 
 }
