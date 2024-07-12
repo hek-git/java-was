@@ -13,11 +13,12 @@ public class StaticResourceHandler implements Handler {
         if(request.method().equals("GET")) {
             return doGet(request);
         }
-        return doPost(request);
+        return new HttpResponse(HttpStatus.METHOD_NOT_ALLOWED, "text", new byte[0]);
     }
 
     @Override
     public HttpResponse doGet(HttpRequest request) throws Exception {
+        System.out.println("StaticResourceHandler doGet");
         String mappedPath = DirectoryMapper.getStaticResourcePath(request.path());
         if (mappedPath != null) {
             return new HttpResponse(HttpStatus.OK, mappedPath, FileReader.getContent(mappedPath));
