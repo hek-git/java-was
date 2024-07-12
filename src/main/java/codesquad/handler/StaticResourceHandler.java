@@ -9,7 +9,7 @@ import codesquad.util.DirectoryMapper;
 public class StaticResourceHandler implements Handler {
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public HttpResponse handle(HttpRequest request) throws Exception {
         if(request.method().equals("GET")) {
             return doGet(request);
         }
@@ -17,7 +17,7 @@ public class StaticResourceHandler implements Handler {
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest request) {
+    public HttpResponse doGet(HttpRequest request) throws Exception {
         String mappedPath = DirectoryMapper.getStaticResourcePath(request.path());
         if (mappedPath != null) {
             return new HttpResponse(HttpStatus.OK, mappedPath, FileReader.getContent(mappedPath));

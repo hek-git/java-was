@@ -56,6 +56,10 @@ public class HttpResponse {
         return responseBuilder.toString().getBytes();
     }
 
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
     private void setMessageHeader(HttpStatus httpStatus, String filePath, int contentLength) {
 
         this.httpStatus = httpStatus;
@@ -72,6 +76,10 @@ public class HttpResponse {
     private void setRedirect(String url) {
         this.httpStatus = HttpStatus.FOUND;
         this.headers.put("Location", url);
+    }
+
+    public static HttpResponse internalServerError() {
+        return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, "text", new byte[0]);
     }
 
     @Override
