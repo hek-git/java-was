@@ -11,8 +11,9 @@ import java.util.Optional;
 public class HandlerMapper {
 
     private static final Map<String, Handler> handlerMapper = Map.of(
-        "/create", new UserCreateHandler(),
-        "/login", new UserLoginHandler()
+        "/user/create", new UserCreateHandler(),
+        "/user/login", new UserLoginHandler(),
+            "/user/list", new UserListHandler()
     );
 
     private HandlerMapper() {
@@ -21,7 +22,7 @@ public class HandlerMapper {
     public static Handler findHandler(String uri) {
 
         Optional<Handler> handler = handlerMapper.entrySet().stream()
-                .filter(entry -> uri.contains(entry.getKey()))
+                .filter(entry -> uri.equals(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .findFirst();
 
