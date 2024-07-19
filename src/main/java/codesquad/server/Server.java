@@ -1,5 +1,7 @@
 package codesquad.server;
 
+import codesquad.database.PostH2Database;
+import codesquad.database.UserH2Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,8 @@ public class Server {
     public Server(int port, int poolSize) {
         this.port = port;
         this.executorService = Executors.newFixedThreadPool(poolSize);
+        UserH2Database.init();
+        PostH2Database.init();
         log.info("Listening for connection on port 8080 ....");
     }
 
