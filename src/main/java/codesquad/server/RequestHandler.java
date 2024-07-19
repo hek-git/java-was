@@ -18,19 +18,22 @@ public class RequestHandler implements Runnable {
 //    private final Socket clientSocket;
     private final HttpRequestParser httpRequestParser;
     private final Socket clientSocket;
+    private final InputStream inputStream;
+    private final OutputStream outputStream;
+
 
     public RequestHandler(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
         this.httpRequestParser = new HttpRequestParser();
+        inputStream = clientSocket.getInputStream();
+        outputStream = clientSocket.getOutputStream();
+
     }
 
     @Override
     public void run() {
 
         try {
-            InputStream inputStream = clientSocket.getInputStream();
-            OutputStream outputStream = clientSocket.getOutputStream();
-
             // HttpRequest 클래스로 파싱하는 부분
             HttpRequest request = httpRequestParser.parse(inputStream);
             // log.info("{}", request.toString());
@@ -56,7 +59,12 @@ public class RequestHandler implements Runnable {
             // HttpResponse 인스턴스를 반환하는 부분
             writeResponse(outputStream, response);
             close();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            try {
+                writeResponse(outputStream, HttpResponse.notFound());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             log.error(e.getMessage());
         }
     }
