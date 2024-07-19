@@ -13,8 +13,8 @@ import java.util.Optional;
 public class Authenticator {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private final static SessionDatabase sessionDatabase = new SessionDatabase();
-    private final static List<String> AUTH_REQUIRED_PATHS = List.of("/user/list", "/user/list.html", "/user/logout", "/write", "/write-tmp.html");
+    private final static SessionDatabase sessionDatabase = SessionDatabase.getInstance();
+    private final static List<String> AUTH_REQUIRED_PATHS = List.of("/user/list", "/user/list.html", "/user/logout", "/write", "/write/write.html");
 
     private Authenticator(){
     }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class UserListHandler implements Handler {
 
-    private final UserH2Database userH2Database = new UserH2Database();
+    private final UserH2Database userH2Database = UserH2Database.getInstance();
 
     @Override
     public HttpResponse handle(HttpRequest request) throws RuntimeException {
@@ -22,7 +22,7 @@ public class UserListHandler implements Handler {
     }
 
     public HttpResponse doGet(HttpRequest request) throws RuntimeException {
-        byte[] content = FileReader.getContent("/user/list.html");
+        byte[] content = FileReader.getContent("/static/user/list.html");
         List<User> users = userH2Database.getAllUser();
         return new HttpResponse(HttpStatus.OK, "html", replace(new String(content), users).getBytes());
     }

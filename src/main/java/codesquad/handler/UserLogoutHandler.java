@@ -10,7 +10,7 @@ import java.util.Map;
 public class UserLogoutHandler implements Handler {
 
 
-    private static final SessionDatabase sessionDatabase = new SessionDatabase();
+    private static final SessionDatabase sessionDatabase = SessionDatabase.getInstance();
 
     @Override
     public HttpResponse handle(HttpRequest request) throws RuntimeException {

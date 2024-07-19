@@ -15,7 +15,7 @@ import java.util.Map;
 public class UserCreateHandler implements Handler {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final UserH2Database h2Database = new UserH2Database();
+    private final UserH2Database h2Database = UserH2Database.getInstance();
 
     public UserCreateHandler() {
     }

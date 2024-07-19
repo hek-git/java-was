@@ -14,9 +14,9 @@ import java.util.UUID;
 
 public class UserLoginHandler implements Handler {
 
-    private final UserH2Database userH2Database = new UserH2Database();
-    private final SessionDatabase sessionDatabase = new SessionDatabase();
-    private final String LOGIN_FAILED_URL = "/user/login_failed.html";
+    private final SessionDatabase sessionDatabase = SessionDatabase.getInstance();
+    private final UserH2Database userH2Database = UserH2Database.getInstance();
+    private final String LOGIN_FAILED_URL = "/static/user/login_failed.html";
 
     public UserLoginHandler() {
     }

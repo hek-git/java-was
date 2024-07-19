@@ -13,10 +13,33 @@ import java.util.Optional;
 public class UserH2Database {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private static final String JDBC_URL = "jdbc:h2:tcp://localhost/~/java-was";
+    private static UserH2Database userH2Database;
+    private static final String JDBC_URL = "jdbc:h2:./java-was";
     private static final String JDBC_USER = "sa";
     private static final String JDBC_PASSWORD = "";
 
+    private UserH2Database() {
+    }
+
+    public static void init() {
+        try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+             Statement statement = connection.createStatement()) {
+            statement.execute("CREATE TABLE IF NOT EXISTS USERS" +
+                    "(ID INT AUTO_INCREMENT PRIMARY KEY," +
+                    "USER_ID VARCHAR(255) NOT NULL," +
+                    "PASSWORD VARCHAR(255) NOT NULL," +
+                    "NAME VARCHAR(255) NOT NULL)");
+        } catch (SQLException e) {
+            throw new RuntimeException("테이블 생성 실패", e);
+        }
+    }
+
+    public static UserH2Database getInstance() {
+        if (userH2Database == null) {
+            userH2Database = new UserH2Database();
+        }
+        return userH2Database;
+    }
 
     public Optional<User> findUserById(String userId) {
         String sql = "SELECT * FROM USERS WHERE USER_ID = ?";
