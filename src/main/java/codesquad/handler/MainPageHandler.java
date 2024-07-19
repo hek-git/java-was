@@ -15,8 +15,8 @@ import java.util.Optional;
 
 public class MainPageHandler implements Handler {
 
-    private static final SessionDatabase sessionDatabase = new SessionDatabase();
-    private static final PostH2Database postH2Database = new PostH2Database();
+    private static final SessionDatabase sessionDatabase = SessionDatabase.getInstance();
+    private static final PostH2Database postH2Database = PostH2Database.getInstance();
 
     @Override
     public HttpResponse handle(HttpRequest request) throws RuntimeException {
@@ -30,7 +30,7 @@ public class MainPageHandler implements Handler {
         if (Authenticator.isLogin(request)) {
             Optional<User> user = sessionDatabase.findUserBySessionId(Authenticator.getSid(request.headers()));
             if (user.isPresent()) {
-                byte[] content = FileReader.getContent("/login_index.html");
+                byte[] content = FileReader.getContent("/static/login_index.html");
                 String s = new String(content);
                 s = s.replace("{{username}}", user.get().getName());
                 s = writePost(s);
@@ -38,7 +38,7 @@ public class MainPageHandler implements Handler {
             }
         }
 
-        byte[] content = FileReader.getContent("/index.html");
+        byte[] content = FileReader.getContent("/static/index.html");
         String s = new String(content);
         s = writePost(s);
         return new HttpResponse(HttpStatus.OK, "html", s.getBytes());
@@ -51,13 +51,15 @@ public class MainPageHandler implements Handler {
             sb.append("""
                     <div class="post">
                       <div class="post__account">
-                        <img class="post__account__img" />
+                        <img class="post__account__img"/>
                         <p class="post__account__nickname">""");
             sb.append(post.getAuthor().getName());
             sb.append("""
                     </p>
                     </div>
-                    <img class="post__img" />
+                    <img class="post__img" src=\"""");
+            sb.append(post.getImagePath()).append("\" />\n");
+            sb.append("""
                     <div class="post__menu">
                       <ul class="post__menu__personal">
                         <li>
