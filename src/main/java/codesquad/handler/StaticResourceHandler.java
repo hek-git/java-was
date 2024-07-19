@@ -19,8 +19,8 @@ public class StaticResourceHandler implements Handler {
     public HttpResponse doGet(HttpRequest request) throws RuntimeException {
         String mappedPath = DirectoryMapper.getStaticResourcePath(request.path());
         if (mappedPath != null) {
-            return new HttpResponse(HttpStatus.OK, mappedPath, FileReader.getContent(mappedPath));
+            return new HttpResponse(HttpStatus.OK, mappedPath, FileReader.getContent("/static" + mappedPath));
         }
-        return new HttpResponse(HttpStatus.OK, request.path(), FileReader.getContent(request.path()));
+        return new HttpResponse(HttpStatus.OK, request.path(), FileReader.getContent("/static" + request.path()));
     }
 }
