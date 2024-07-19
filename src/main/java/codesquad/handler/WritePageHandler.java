@@ -12,14 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.util.*;
 
 public class WritePageHandler implements Handler {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final static SessionDatabase sessionDatabase = new SessionDatabase();
-    private final static PostH2Database postH2Database = new PostH2Database();
+    private final static SessionDatabase sessionDatabase = SessionDatabase.getInstance();
+    private final static PostH2Database postH2Database = PostH2Database.getInstance();
 
     @Override
     public HttpResponse handle(HttpRequest request) throws RuntimeException {
@@ -38,7 +37,7 @@ public class WritePageHandler implements Handler {
 
 
     public HttpResponse doGet(HttpRequest request) throws RuntimeException {
-        byte[] content = FileReader.getContent("/write/write.html");
+        byte[] content = FileReader.getContent("/static/write/write.html");
         String s = new String(content);
         Optional<String> cookie = request.getCookie();
         if(cookie.isPresent()) {
@@ -53,106 +52,113 @@ public class WritePageHandler implements Handler {
 
 
     public HttpResponse doPost(HttpRequest request) throws IOException {
-        log.info(request.toString());
         Optional<String> cookie = request.getCookie();
         if(cookie.isPresent()) {
             Optional<User> userOptional = sessionDatabase.findUserBySessionId(cookie.get().split("=")[1]);
             if(userOptional.isPresent()) {
-                User user = userOptional.get();
-                postH2Database.addPost(new Post(user, parseFormData(request)));
-
+                parseFormData(request, userOptional.get());
             }
         }
 
         return new HttpResponse("/");
     }
 
-    private String parseFormData(HttpRequest request) throws IOException {
-//        Map<String, Object> formData = new HashMap<>();
-//
-//        String contentType = request.headers().get("Content-Type");
-//        String boundary = contentType.split("boundary=")[1];
-//        byte[] body = request.body();
+    private void parseFormData(HttpRequest request, User user) throws IOException {
+
+        String contentType = request.headers().get("Content-Type");
         byte[] body = request.body();
-        String content = new String(body);
-        return URLDecoder.decode(content.split("=")[1], "UTF-8");
+        byte[] boundaryByte = ("--" + contentType.split("=")[1]).getBytes();
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(body);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        for(int i = 0; i < boundaryByte.length + 2; i++) {
+            inputStream.read();
+        }
+
+        int b;
+        String content = "", imagePath = "";
+        byte[] parsedBody;
+        boolean isBody = false;
+        Map<String, String> headerMap = new HashMap<>();
+
+        while((b = inputStream.read()) != -1) {
+
+            if(!isBody && endsWith(outputStream, "\r\n\r\n".getBytes())) {
+                String[] headers = outputStream.toString().trim().split("\r\n");
+
+                for(String header : headers) {
+                    String[] headerSplit = header.split(": ");
+                    headerMap.put(headerSplit[0], headerSplit[1]);
+                }
+                outputStream.reset();
+                isBody = true;
+            }
+
+            if(endsWith(outputStream, boundaryByte)) {
+                parsedBody = extractBody(outputStream, boundaryByte);
+                outputStream.reset();
+                if(headerMap.get("Content-Type") != null) {
+                    String fileName = headerMap.get("Content-Disposition").split(";")[2].split("\"")[1];
+                    imagePath = extractFile(parsedBody, fileName);
+                    log.info("imagePath : {}", imagePath);
+                } else {
+                    content = new String(parsedBody);
+                }
+                isBody = false;
+                headerMap.clear();
+            }
+            outputStream.write(b);
+        }
+
+        postH2Database.addPost(new Post(user, content, imagePath));
+        inputStream.close();
+        outputStream.close();
     }
 
-//    public static void parseMultipartData(byte[] body, String boundary) throws IOException {
-//        String boundaryString = "--" + boundary;
-//        byte[] boundaryBytes = boundaryString.getBytes();
-//
-//        int pos = 0;
-//        while ((pos = indexOf(body, boundaryBytes, pos)) != -1) {
-//            int nextBoundaryPos = indexOf(body, boundaryBytes, pos + boundaryBytes.length);
-//            if (nextBoundaryPos == -1) {
-//                break;
-//            }
-//
-//            int start = pos + boundaryBytes.length + 2; // skip boundary and CRLF
-//            int end = nextBoundaryPos - 2; // skip CRLF before next boundary
-//            byte[] part = Arrays.copyOfRange(body, start, end);
-//
-//            parsePart(part);
-//
-//            pos = nextBoundaryPos;
-//        }
-//    }
-//
-//    private static void parsePart(byte[] part) throws IOException {
-//        String partAsString = new String(part);
-//        String[] headersAndBody = partAsString.split("\r\n\r\n", 2);
-//        if (headersAndBody.length < 2) {
-//            return;
-//        }
-//
-//        String headers = headersAndBody[0];
-//        byte[] body = headersAndBody[1].getBytes();
-//
-//        String[] headerLines = headers.split("\r\n");
-//        String contentDisposition = null;
-//        String contentType = null;
-//        for (String headerLine : headerLines) {
-//            if (headerLine.startsWith("Content-Disposition")) {
-//                contentDisposition = headerLine;
-//            } else if (headerLine.startsWith("Content-Type")) {
-//                contentType = headerLine;
-//            }
-//        }
-//
-//        if (contentDisposition != null && contentDisposition.contains("filename")) {
-//            String filename = contentDisposition.split("filename=")[1].replaceAll("\"", "");
-//            saveFile(body, filename);
-//        } else if (contentDisposition != null && contentDisposition.contains("name=\"title\"")) {
-//            String title = new String(body);
-//            System.out.println("Title: " + title.trim());
-//        } else if (contentDisposition != null && contentDisposition.contains("name=\"content\"")) {
-//            String content = new String(body);
-//            System.out.println("Content: " + content.trim());
-//        }
-//    }
-//
-//    private static void saveFile(byte[] fileData, String filename) throws IOException {
-//        try (FileOutputStream fos = new FileOutputStream(filename)) {
-//            fos.write(fileData);
-//        }
-//        System.out.println("File saved as: " + filename);
-//    }
-//
-//    private static int indexOf(byte[] outerArray, byte[] smallerArray, int start) {
-//        for (int i = start; i < outerArray.length - smallerArray.length + 1; ++i) {
-//            boolean found = true;
-//            for (int j = 0; j < smallerArray.length; ++j) {
-//                if (outerArray[i + j] != smallerArray[j]) {
-//                    found = false;
-//                    break;
-//                }
-//            }
-//            if (found) {
-//                return i;
-//            }
-//        }
-//        return -1;
-//    }
+    private boolean endsWith(ByteArrayOutputStream outputStream, byte[] bytes) {
+        byte[] outputBytes = outputStream.toByteArray();
+        if(outputBytes.length < bytes.length) {
+            return false;
+        }
+        for(int i = 0; i < bytes.length; i++) {
+            if(outputBytes[outputBytes.length - bytes.length + i] != bytes[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private byte[] extractBody(ByteArrayOutputStream outputStream, byte[] boundaryByte) {
+        int bodyLength = outputStream.size() - boundaryByte.length - 2;
+        byte[] bytes = new byte[bodyLength];
+        System.arraycopy(outputStream.toByteArray(), 0, bytes, 0, bodyLength);
+        return bytes;
+    }
+
+    private String extractFile(byte[] body, String extension) {
+        String homeDir = System.getProperty("user.home");
+        String photoDirectoryPath = homeDir + "/photo";
+        File photoDirectory = new File(photoDirectoryPath);
+
+
+        if (!photoDirectory.exists()) {
+            photoDirectory.mkdirs();
+        }
+
+        try {
+            UUID uuid = UUID.randomUUID();
+            String fileName = uuid + extension;
+            File outputFile = new File(photoDirectory, fileName);
+            FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+            fileOutputStream.write(body);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            return "/photo/" + fileName;
+        } catch (IOException e) {
+            log.info(e.getMessage());
+            return null;
+        }
+    }
 
 }
