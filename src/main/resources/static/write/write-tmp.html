@@ -29,14 +29,10 @@
             </li>
         </ul>
     </header>
-    <form action="/write" method="post" enctype="multipart/form-data">
+    <form action="/write" method="post">
         <div class="form-group">
             <label for="content">내용</label>
             <textarea id="content" name="content" rows="10" required class="textfield textfield_size_m"></textarea>
-        </div>
-        <div class="form-group">
-            <label for="image">이미지 업로드</label>
-            <input type="file" id="image" name="image" class="textfield textfield_size_s">
         </div>
         <button type="submit" class="btn btn_contained btn_size_m">Submit</button>
     </form>
