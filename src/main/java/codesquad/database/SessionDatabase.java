@@ -8,6 +8,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SessionDatabase {
 
     private static final ConcurrentHashMap<String, User> sessions = new ConcurrentHashMap<>();
+    private static SessionDatabase sessionDatabase;
+
+    private SessionDatabase() {
+    }
+
+    public static SessionDatabase getInstance() {
+        if (sessionDatabase == null) {
+            sessionDatabase = new SessionDatabase();
+        }
+        return sessionDatabase;
+    }
 
     public void addSession(String sessionId, User user) {
         sessions.put(sessionId, user);
