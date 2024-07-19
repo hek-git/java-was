@@ -7,7 +7,6 @@ import java.io.*;
 
 public class FileReader {
 
-    private final static String STATIC_PATH = "/static";
     private final static Logger log = LoggerFactory.getLogger(FileReader.class);
 
     private FileReader() {
@@ -15,11 +14,11 @@ public class FileReader {
 
     public static byte[] getContent(String resourceName) throws RuntimeException {
 
-        InputStream resourceAsStream = FileReader.class.getResourceAsStream(STATIC_PATH + resourceName);
+        InputStream resourceAsStream = FileReader.class.getResourceAsStream(resourceName);
 
         try {
             if (resourceAsStream == null) {
-                throw new FileNotFoundException("Resource not found: " + STATIC_PATH + resourceName);
+                throw new FileNotFoundException("Resource not found: " + resourceName);
             }
             return resourceAsStream.readAllBytes();
         } catch (IOException e) {
