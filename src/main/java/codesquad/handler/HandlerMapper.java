@@ -31,6 +31,10 @@ public class HandlerMapper {
             return handler.get();
         }
 
+        if(uri.contains("/photo")) {
+            return new PhotoHandler();
+        }
+
         if(DirectoryMapper.isDirectory(uri)){
             return findHandler(DirectoryMapper.getStaticResourcePath(uri));
         }
